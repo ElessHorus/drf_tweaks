@@ -51,9 +51,7 @@ class DatabaseAccessLintingApiTestCase(APITestCase):
 # choose DatabaseAccessLintingAPIClient instead.
 class QueryCountingAPIClient(DatabaseAccessLintingAPIClient):
     def __init__(self, *args, **kwargs):
-        super().__init__(
-            with_lock_limiter=False, *args, **kwargs
-        )
+        super().__init__(with_lock_limiter=False, *args, **kwargs)
 
 
 class QueryCountingTestCaseMixin:

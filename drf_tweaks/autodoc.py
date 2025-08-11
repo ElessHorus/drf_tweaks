@@ -305,13 +305,11 @@ def autodoc(
             for method_name in autodoc_class.applies_to:
                 method = getattr(cls, method_name, None)
                 if method:
-                    method.__doc__ = (
-                        autodoc_class.update_docstring(
-                            cls,
-                            base_doc,
-                            method.__doc__,
-                            method_name,
-                        )
+                    method.__doc__ = autodoc_class.update_docstring(
+                        cls,
+                        base_doc,
+                        method.__doc__,
+                        method_name,
                     )
         return cls
 
