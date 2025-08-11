@@ -20,7 +20,6 @@ from functools import wraps
 from rest_framework.settings import import_from_string
 
 
-
 class AutodocBase:
     """base class for autodoc"""
 
