@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from rest_framework import status
@@ -22,7 +21,7 @@ class ObsoleteVersionException(APIException):
     default_detail = _("This API Version is Obsolete.")
 
 
-class ApiVersionMixin(object):
+class ApiVersionMixin:
     """
     Use this as first in inheritance chain when creating own API classes
     Returns serializer depending on versioning_serializer_classess and version

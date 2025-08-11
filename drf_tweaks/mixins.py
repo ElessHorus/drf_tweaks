@@ -2,7 +2,7 @@ from collections import deque
 from rest_framework.exceptions import NotFound, ValidationError
 
 
-class BulkEditAPIMixin(object):
+class BulkEditAPIMixin:
     details_serializer_class = None
     # how many items can be edited at once, disabled if None
     BULK_EDIT_MAX_ITEMS = None

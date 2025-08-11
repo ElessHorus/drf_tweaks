@@ -11,7 +11,7 @@ class TooManySQLQueriesException(Exception):
     pass
 
 
-class TestQueryCounter(object):
+class TestQueryCounter:
     __instance = None
 
     def __new__(cls, *args, **kwargs):
@@ -61,7 +61,7 @@ def hacked_execute(self, sql, params=()):
     return self.old_execute(sql, params)
 
 
-class query_counter(object):
+class query_counter:
     def __enter__(self):
         # reset counter
         TestQueryCounter().reset()

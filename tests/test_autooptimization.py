@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from rest_framework.permissions import AllowAny
 from django.test import override_settings
 from django.urls import re_path

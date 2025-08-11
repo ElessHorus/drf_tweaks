@@ -10,7 +10,7 @@ def autofilter(extra_ordering=None, extra_filter=None, exclude_fields=None):
         # get indexed fields
         serializer_class = cls().get_serializer_class()
         model_cls = serializer_class.Meta.model
-        fields = set([])
+        fields = set()
         for serializer_field in serializer_class()._readable_fields:
             name = serializer_field.field_name
             try:

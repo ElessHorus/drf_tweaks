@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """auto documentation for django-rest-framework
 
 usage:
@@ -15,7 +14,6 @@ or add certain classess:
 you can also override autodoc classess
 @autodoc(classess=[PaginationAutodoc])
 """
-from __future__ import unicode_literals
 
 from django.conf import settings
 from functools import wraps
@@ -24,7 +22,7 @@ from rest_framework.settings import import_from_string
 import six
 
 
-class AutodocBase(object):
+class AutodocBase:
     """base class for autodoc"""
 
     applies_to = ("get", "post", "put", "patch", "delete")
@@ -181,7 +179,7 @@ class OrderingAndFilteringAutodoc(AutodocBase):
             text += "<b>Filtering:</b>"
             if isinstance(filter_fields, dict):
                 for key in sorted(filter_fields.keys()):
-                    text += "\n\n\t%s: %s" % (
+                    text += "\n\n\t{}: {}".format(
                         key,
                         ", ".join(
                             x if x == "exact" else "__" + x for x in filter_fields[key]
@@ -282,7 +280,7 @@ def autodoc(
         setattr(cls, method_name, shadow_method)
 
     def wrapped(cls):
-        applies_to = set([])
+        applies_to = set()
         classess_to_apply = [
             c for c in classess if not skip_classess or c not in skip_classess
         ]
@@ -307,11 +305,11 @@ def autodoc(
             for method_name in autodoc_class.applies_to:
                 method = getattr(cls, method_name, None)
                 if method:
-                    six.get_unbound_function(method).__doc__ = (
+                    method.__doc__ = (
                         autodoc_class.update_docstring(
                             cls,
                             base_doc,
-                            six.get_unbound_function(method).__doc__,
+                            method.__doc__,
                             method_name,
                         )
                     )

@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from copy import copy
 from rest_framework import serializers
 from rest_framework.fields import (
@@ -15,7 +12,7 @@ from rest_framework.fields import (
 from rest_framework.serializers import as_serializer_error, PKOnlyObject
 
 
-class ContextPassing(object):
+class ContextPassing:
     @classmethod
     def filter_fields(cls, field_name, fields):
         filtered_fields = set()
@@ -101,13 +98,13 @@ def pass_context(field_name, context):
     return new_context
 
 
-class SerializerCustomizationMixin(object):
+class SerializerCustomizationMixin:
     # blank/required errors override
     required_error = blank_error = None
     custom_required_errors = custom_blank_errors = {}
 
     def __init__(self, *args, **kwargs):
-        super(SerializerCustomizationMixin, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.change_required_message()
 
     def change_required_message(self):
@@ -136,7 +133,7 @@ class SerializerCustomizationMixin(object):
     required_fields = []
 
     def get_fields(self):
-        fields = super(SerializerCustomizationMixin, self).get_fields()
+        fields = super().get_fields()
 
         for f in self.required_fields:
             fields[f].required = True

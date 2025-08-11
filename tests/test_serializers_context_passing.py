@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from django.test import override_settings
 from django.urls import re_path
 from rest_framework import serializers

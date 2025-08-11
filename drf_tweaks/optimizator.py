@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from distutils.version import LooseVersion
 from django import get_version
 from drf_tweaks.serializers import ContextPassing
@@ -122,7 +121,7 @@ def run_autooptimization_discovery(
                         select_related_set.add(prefix + field_name)
 
 
-class AutoOptimizeMixin(object):
+class AutoOptimizeMixin:
     def get_queryset(self):
         # discover select/prefetch related structure
         serializer = self.get_serializer_class()(context=self.get_serializer_context())
@@ -148,7 +147,7 @@ class AutoOptimizeMixin(object):
         )
 
         # ammending queryset
-        queryset = super(AutoOptimizeMixin, self).get_queryset()
+        queryset = super().get_queryset()
         if select_related_set:
             queryset = queryset.select_related(*list(select_related_set))
         if prefetch_related_set:

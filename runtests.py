@@ -1,7 +1,6 @@
 #! /usr/bin/env python
 # This script is taken from Django Rest Framework
 # (https://github.com/tomchristie/django-rest-framework/blob/master/runtests.py)
-from __future__ import print_function
 
 import os
 import subprocess
@@ -62,7 +61,7 @@ def isort_main(args):
 
 def split_class_and_function(string):
     class_string, function_string = string.split(".", 1)
-    return "%s and %s" % (class_string, function_string)
+    return "{} and {}".format(class_string, function_string)
 
 
 def is_function(string):

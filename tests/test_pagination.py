@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 """Tests for NoCounts paginators - based on the tests of original paginators from DRF"""
-from __future__ import unicode_literals
 
 from django.test import TestCase
 from rest_framework.request import Request

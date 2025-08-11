@@ -15,23 +15,23 @@ class DatabaseAccessLintingAPIClient(APIClient):
 
     def __init__(self, with_lock_limiter=True, *args, **kwargs):
         self.with_lock_limiter = with_lock_limiter
-        super(DatabaseAccessLintingAPIClient, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def get(self, *args, **kwargs):
         with self.linters():
-            return super(DatabaseAccessLintingAPIClient, self).get(*args, **kwargs)
+            return super().get(*args, **kwargs)
 
     def post(self, *args, **kwargs):
         with self.linters():
-            return super(DatabaseAccessLintingAPIClient, self).post(*args, **kwargs)
+            return super().post(*args, **kwargs)
 
     def put(self, *args, **kwargs):
         with self.linters():
-            return super(DatabaseAccessLintingAPIClient, self).put(*args, **kwargs)
+            return super().put(*args, **kwargs)
 
     def patch(self, *args, **kwargs):
         with self.linters():
-            return super(DatabaseAccessLintingAPIClient, self).patch(*args, **kwargs)
+            return super().patch(*args, **kwargs)
 
     @contextmanager
     def linters(self):
@@ -51,12 +51,12 @@ class DatabaseAccessLintingApiTestCase(APITestCase):
 # choose DatabaseAccessLintingAPIClient instead.
 class QueryCountingAPIClient(DatabaseAccessLintingAPIClient):
     def __init__(self, *args, **kwargs):
-        super(QueryCountingAPIClient, self).__init__(
+        super().__init__(
             with_lock_limiter=False, *args, **kwargs
         )
 
 
-class QueryCountingTestCaseMixin(object):
+class QueryCountingTestCaseMixin:
     client_class = QueryCountingAPIClient
 
 

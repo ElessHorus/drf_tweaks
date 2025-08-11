@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 import io
 import os
 import re
@@ -12,7 +11,7 @@ def local_open(fname):
 
 
 def read_md(f):
-    return io.open(f, "r", encoding="utf-8").read()
+    return open(f, encoding="utf-8").read()
 
 
 def get_version(package):
