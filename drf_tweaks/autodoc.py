@@ -19,7 +19,6 @@ from django.conf import settings
 from functools import wraps
 from rest_framework.settings import import_from_string
 
-import six
 
 
 class AutodocBase:
