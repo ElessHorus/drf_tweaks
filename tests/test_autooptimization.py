@@ -8,7 +8,12 @@ from rest_framework.generics import ListAPIView, RetrieveAPIView
 from rest_framework.reverse import reverse
 from drf_tweaks.optimizator import AutoOptimizeMixin
 from drf_tweaks import test_utils
-from tests.models import AutoOptimization1Model, AutoOptimization2Model, AutoOptimization3Model, SampleModel
+from tests.models import (
+    AutoOptimization1Model,
+    AutoOptimization2Model,
+    AutoOptimization3Model,
+    SampleModel,
+)
 
 
 # serializers for many to one - forward tests (select related)
@@ -44,7 +49,9 @@ class SimplePrefetchRelated3Serializer(serializers.ModelSerializer):
 
 
 class SimplePrefetchRelated2Serializer(serializers.ModelSerializer):
-    reverse_1_data = SimplePrefetchRelated3Serializer(source="reverse_1", read_only=True, many=True)
+    reverse_1_data = SimplePrefetchRelated3Serializer(
+        source="reverse_1", read_only=True, many=True
+    )
 
     class Meta:
         model = AutoOptimization2Model
@@ -52,12 +59,23 @@ class SimplePrefetchRelated2Serializer(serializers.ModelSerializer):
 
 
 class SimplePrefetchRelatedSerializer(serializers.ModelSerializer):
-    reverse_2_1_data = SimplePrefetchRelated2Serializer(source="reverse_2_1", read_only=True, many=True)
-    reverse_2_2_data = SimplePrefetchRelated2Serializer(source="reverse_2_2", read_only=True, many=True)
+    reverse_2_1_data = SimplePrefetchRelated2Serializer(
+        source="reverse_2_1", read_only=True, many=True
+    )
+    reverse_2_2_data = SimplePrefetchRelated2Serializer(
+        source="reverse_2_2", read_only=True, many=True
+    )
 
     class Meta:
         model = AutoOptimization3Model
-        fields = ["id", "name", "reverse_2_1", "reverse_2_2", "reverse_2_1_data", "reverse_2_2_data"]
+        fields = [
+            "id",
+            "name",
+            "reverse_2_1",
+            "reverse_2_2",
+            "reverse_2_1_data",
+            "reverse_2_2_data",
+        ]
 
 
 # serializers for combining prefetch related with select related
@@ -77,7 +95,9 @@ class PrefetchWithSelectRelated3Serializer(serializers.ModelSerializer):
 
 
 class PrefetchWithSelectRelated2Serializer(serializers.ModelSerializer):
-    reverse_1_data = PrefetchWithSelectRelated3Serializer(source="reverse_1", read_only=True, many=True)
+    reverse_1_data = PrefetchWithSelectRelated3Serializer(
+        source="reverse_1", read_only=True, many=True
+    )
     sample_data = SampleSerializer(source="sample", read_only=True)
 
     class Meta:
@@ -86,13 +106,25 @@ class PrefetchWithSelectRelated2Serializer(serializers.ModelSerializer):
 
 
 class PrefetchWithSelectRelatedSerializer(serializers.ModelSerializer):
-    reverse_2_1_data = PrefetchWithSelectRelated2Serializer(source="reverse_2_1", read_only=True, many=True)
-    reverse_2_2_data = PrefetchWithSelectRelated2Serializer(source="reverse_2_2", read_only=True, many=True)
+    reverse_2_1_data = PrefetchWithSelectRelated2Serializer(
+        source="reverse_2_1", read_only=True, many=True
+    )
+    reverse_2_2_data = PrefetchWithSelectRelated2Serializer(
+        source="reverse_2_2", read_only=True, many=True
+    )
     sample_data = SampleSerializer(source="sample", read_only=True)
 
     class Meta:
         model = AutoOptimization3Model
-        fields = ["id", "name", "reverse_2_1", "reverse_2_2", "reverse_2_1_data", "reverse_2_2_data", "sample_data"]
+        fields = [
+            "id",
+            "name",
+            "reverse_2_1",
+            "reverse_2_2",
+            "reverse_2_1_data",
+            "reverse_2_2_data",
+            "sample_data",
+        ]
 
 
 # simple serializer for select_related for the source
@@ -140,15 +172,31 @@ class PrefetchRelatedForcedAPI(AutoOptimizeMixin, ListAPIView):
 
 
 urlpatterns = [
-    re_path(r"^autooptimization/simple-select-related$", SimpleSelectRelatedAPI.as_view(), name="simple-select-related"),
-    re_path(r"^autooptimization/simple-prefetch-related$", SimplePrefetchRelatedAPI.as_view(),
-            name="simple-prefetch-related"),
-    re_path(r"^autooptimization/prefetch-with-select-related$", PrefetchWithSelectRelatedAPI.as_view(),
-            name="prefetch-with-select-related"),
-    re_path(r"^autooptimization/select-related-by-source$", SelectRelatedBySourceAPI.as_view(),
-            name="select-related-by-source"),
-    re_path(r"^autooptimization/prefetch-related-forced$", PrefetchRelatedForcedAPI.as_view(),
-            name="prefetch-related-forced"),
+    re_path(
+        r"^autooptimization/simple-select-related$",
+        SimpleSelectRelatedAPI.as_view(),
+        name="simple-select-related",
+    ),
+    re_path(
+        r"^autooptimization/simple-prefetch-related$",
+        SimplePrefetchRelatedAPI.as_view(),
+        name="simple-prefetch-related",
+    ),
+    re_path(
+        r"^autooptimization/prefetch-with-select-related$",
+        PrefetchWithSelectRelatedAPI.as_view(),
+        name="prefetch-with-select-related",
+    ),
+    re_path(
+        r"^autooptimization/select-related-by-source$",
+        SelectRelatedBySourceAPI.as_view(),
+        name="select-related-by-source",
+    ),
+    re_path(
+        r"^autooptimization/prefetch-related-forced$",
+        PrefetchRelatedForcedAPI.as_view(),
+        name="prefetch-related-forced",
+    ),
 ]
 
 
@@ -164,13 +212,17 @@ class TestAutoOptimization(test_utils.QueryCountingApiTestCase):
 
         for dummy in range(0, 3):
             self.lvl_3_models.append(
-                AutoOptimization3Model.objects.create(name="m3", sample=self.sample_models[0])
+                AutoOptimization3Model.objects.create(
+                    name="m3", sample=self.sample_models[0]
+                )
             )
             for dummy_2 in range(0, 3):
                 self.lvl_2_models.append(
                     AutoOptimization2Model.objects.create(
-                        name="m2", sample=self.sample_models[0],
-                        fk_3_1=self.lvl_3_models[-1], fk_3_2=self.lvl_3_models[-1]
+                        name="m2",
+                        sample=self.sample_models[0],
+                        fk_3_1=self.lvl_3_models[-1],
+                        fk_3_2=self.lvl_3_models[-1],
                     )
                 )
                 for dummy_3 in range(0, 3):
@@ -196,7 +248,10 @@ class TestAutoOptimization(test_utils.QueryCountingApiTestCase):
         self.assertIn("tests_autooptimization3model", query_stack[0][0])
 
     def test_select_related_with_filters(self):
-        response = self.client.get(reverse("simple-select-related"), {"fields": "name,fk_2_data,fk_2_data__name"})
+        response = self.client.get(
+            reverse("simple-select-related"),
+            {"fields": "name,fk_2_data,fk_2_data__name"},
+        )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 27)
         self.assertEqual(response.data[0]["name"], "m1")
@@ -219,20 +274,27 @@ class TestAutoOptimization(test_utils.QueryCountingApiTestCase):
         self.assertEqual(response.data["reverse_2_2_data"][0]["name"], "m2")
         self.assertEqual(len(response.data["reverse_2_1_data"][0]["reverse_1"]), 3)
         self.assertEqual(len(response.data["reverse_2_2_data"][0]["reverse_1_data"]), 3)
-        self.assertEqual(response.data["reverse_2_2_data"][0]["reverse_1_data"][0]["name"], "m1")
+        self.assertEqual(
+            response.data["reverse_2_2_data"][0]["reverse_1_data"][0]["name"], "m1"
+        )
 
         # main object, reverse_2_1, reverse_2_2, reverse_2_1__reverse_1, reverse_2_2__reverse_1
         self.assertEqual(test_utils.TestQueryCounter().get_counter(), 5)
 
     def test_prefetch_related_with_filters(self):
-        response = self.client.get(reverse("simple-prefetch-related"), {"fields": "name,reverse_2_1,reverse_2_1_data"})
+        response = self.client.get(
+            reverse("simple-prefetch-related"),
+            {"fields": "name,reverse_2_1,reverse_2_1_data"},
+        )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["name"], "m3")
         self.assertEqual(len(response.data["reverse_2_1"]), 3)
         self.assertEqual(len(response.data["reverse_2_1_data"]), 3)
         self.assertEqual(response.data["reverse_2_1_data"][0]["name"], "m2")
         self.assertEqual(len(response.data["reverse_2_1_data"][0]["reverse_1"]), 3)
-        self.assertEqual(response.data["reverse_2_1_data"][0]["reverse_1_data"][0]["name"], "m1")
+        self.assertEqual(
+            response.data["reverse_2_1_data"][0]["reverse_1_data"][0]["name"], "m1"
+        )
 
         # main object, reverse_2_1, reverse_2_1__reverse_1
         self.assertEqual(test_utils.TestQueryCounter().get_counter(), 3)
@@ -249,11 +311,19 @@ class TestAutoOptimization(test_utils.QueryCountingApiTestCase):
         self.assertEqual(len(response.data[0]["reverse_2_2_data"]), 3)
         self.assertEqual(response.data[0]["reverse_2_1_data"][0]["name"], "m2")
         self.assertEqual(response.data[0]["reverse_2_2_data"][0]["name"], "m2")
-        self.assertEqual(response.data[0]["reverse_2_1_data"][0]["sample_data"]["a"], "a")
-        self.assertEqual(response.data[0]["reverse_2_2_data"][0]["sample_data"]["a"], "a")
+        self.assertEqual(
+            response.data[0]["reverse_2_1_data"][0]["sample_data"]["a"], "a"
+        )
+        self.assertEqual(
+            response.data[0]["reverse_2_2_data"][0]["sample_data"]["a"], "a"
+        )
         self.assertEqual(len(response.data[0]["reverse_2_1_data"][0]["reverse_1"]), 3)
-        self.assertEqual(len(response.data[0]["reverse_2_2_data"][0]["reverse_1_data"]), 3)
-        self.assertEqual(response.data[0]["reverse_2_2_data"][0]["reverse_1_data"][0]["name"], "m1")
+        self.assertEqual(
+            len(response.data[0]["reverse_2_2_data"][0]["reverse_1_data"]), 3
+        )
+        self.assertEqual(
+            response.data[0]["reverse_2_2_data"][0]["reverse_1_data"][0]["name"], "m1"
+        )
 
         # main objects list, reverse_2_1, reverse_2_2, reverse_2_1__sample, reverse_2_2__sample,
         # reverse_2_1__reverse_1, reverse_2_2__reverse_1
@@ -271,20 +341,29 @@ class TestAutoOptimization(test_utils.QueryCountingApiTestCase):
         self.assertEqual(len(response.data[0]["reverse_2_2_data"]), 3)
         self.assertEqual(response.data[0]["reverse_2_1_data"][0]["name"], "m2")
         self.assertEqual(response.data[0]["reverse_2_2_data"][0]["name"], "m2")
-        self.assertEqual(response.data[0]["reverse_2_1_data"][0]["sample_data"]["a"], "a")
-        self.assertEqual(response.data[0]["reverse_2_2_data"][0]["sample_data"]["a"], "a")
+        self.assertEqual(
+            response.data[0]["reverse_2_1_data"][0]["sample_data"]["a"], "a"
+        )
+        self.assertEqual(
+            response.data[0]["reverse_2_2_data"][0]["sample_data"]["a"], "a"
+        )
         self.assertEqual(len(response.data[0]["reverse_2_1_data"][0]["reverse_1"]), 3)
-        self.assertEqual(len(response.data[0]["reverse_2_2_data"][0]["reverse_1_data"]), 3)
-        self.assertEqual(response.data[0]["reverse_2_2_data"][0]["reverse_1_data"][0]["name"], "m1")
+        self.assertEqual(
+            len(response.data[0]["reverse_2_2_data"][0]["reverse_1_data"]), 3
+        )
+        self.assertEqual(
+            response.data[0]["reverse_2_2_data"][0]["reverse_1_data"][0]["name"], "m1"
+        )
 
         # main objects list, reverse_2_1, reverse_2_2, reverse_2_1__sample, reverse_2_2__sample,
         # reverse_2_1__reverse_1, reverse_2_2__reverse_1
         self.assertEqual(test_utils.TestQueryCounter().get_counter(), 8)
 
     def test_prefetch_with_select_related_with_include_fields(self):
-        response = self.client.get(reverse("prefetch-with-select-related"), {
-            "include_fields": "reverse_2_1_data__reverse_1_data__sample_m2m_data"
-        })
+        response = self.client.get(
+            reverse("prefetch-with-select-related"),
+            {"include_fields": "reverse_2_1_data__reverse_1_data__sample_m2m_data"},
+        )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 3)
         self.assertEqual(response.data[0]["name"], "m3")
@@ -295,11 +374,19 @@ class TestAutoOptimization(test_utils.QueryCountingApiTestCase):
         self.assertEqual(len(response.data[0]["reverse_2_2_data"]), 3)
         self.assertEqual(response.data[0]["reverse_2_1_data"][0]["name"], "m2")
         self.assertEqual(response.data[0]["reverse_2_2_data"][0]["name"], "m2")
-        self.assertEqual(response.data[0]["reverse_2_1_data"][0]["sample_data"]["a"], "a")
-        self.assertEqual(response.data[0]["reverse_2_2_data"][0]["sample_data"]["a"], "a")
+        self.assertEqual(
+            response.data[0]["reverse_2_1_data"][0]["sample_data"]["a"], "a"
+        )
+        self.assertEqual(
+            response.data[0]["reverse_2_2_data"][0]["sample_data"]["a"], "a"
+        )
         self.assertEqual(len(response.data[0]["reverse_2_1_data"][0]["reverse_1"]), 3)
-        self.assertEqual(len(response.data[0]["reverse_2_2_data"][0]["reverse_1_data"]), 3)
-        self.assertEqual(response.data[0]["reverse_2_2_data"][0]["reverse_1_data"][0]["name"], "m1")
+        self.assertEqual(
+            len(response.data[0]["reverse_2_2_data"][0]["reverse_1_data"]), 3
+        )
+        self.assertEqual(
+            response.data[0]["reverse_2_2_data"][0]["reverse_1_data"][0]["name"], "m1"
+        )
 
         # main objects list, reverse_2_1, reverse_2_2, reverse_2_1__sample, reverse_2_2__sample,
         # reverse_2_1__reverse_1, reverse_2_2__reverse_1, reverse_2_1__reverse_1__sample_m2m

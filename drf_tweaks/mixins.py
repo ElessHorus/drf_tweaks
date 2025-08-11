@@ -40,12 +40,18 @@ class BulkEditAPIMixin(object):
 
     def _perform_bulk_edit(self, items):
         update_delete_ids = set(items["update"].keys()) | set(items["delete"].keys())
-        update_delete_objects = {item.id: item for item in self.get_queryset().filter(id__in=update_delete_ids)}
+        update_delete_objects = {
+            item.id: item
+            for item in self.get_queryset().filter(id__in=update_delete_ids)
+        }
         update_delete_objects_ids = set(update_delete_objects.keys())
         if update_delete_ids != update_delete_objects_ids:
             not_found_ids = update_delete_ids - update_delete_objects_ids
             raise NotFound(
-                [{"id": item_id, "non_field_errors": ["This item does not exist."]} for item_id in not_found_ids]
+                [
+                    {"id": item_id, "non_field_errors": ["This item does not exist."]}
+                    for item_id in not_found_ids
+                ]
             )
 
         errors = []
@@ -58,8 +64,12 @@ class BulkEditAPIMixin(object):
                     action = serializer.save
                 elif change_type in ["update", "delete"]:
                     instance = update_delete_objects[item_id]
-                    serializer = self.get_details_serializer(instance=instance, data=item, partial=True)
-                    action = {"update": serializer.save, "delete": instance.delete}[change_type]
+                    serializer = self.get_details_serializer(
+                        instance=instance, data=item, partial=True
+                    )
+                    action = {"update": serializer.save, "delete": instance.delete}[
+                        change_type
+                    ]
 
                 id_key = self._get_item_id_key(item)
                 if serializer and not serializer.is_valid():
@@ -94,11 +104,21 @@ class BulkEditAPIMixin(object):
     def put(self, request, *args, **kwargs):
         """Bulk edit for member medications"""
         if not isinstance(request.data, list):
-            raise ValidationError({"non_field_errors": ["Payload for bulk edit must be a list of objects to edit."]})
+            raise ValidationError(
+                {
+                    "non_field_errors": [
+                        "Payload for bulk edit must be a list of objects to edit."
+                    ]
+                }
+            )
 
         if self.BULK_EDIT_MAX_ITEMS and len(request.data) > self.BULK_EDIT_MAX_ITEMS:
             raise ValidationError(
-                {"non_field_errors": [f"Cannot edit more than {self.BULK_EDIT_MAX_ITEMS} items at once."]}
+                {
+                    "non_field_errors": [
+                        f"Cannot edit more than {self.BULK_EDIT_MAX_ITEMS} items at once."
+                    ]
+                }
             )
 
         items = self._get_bulk_edit_items(request.data)

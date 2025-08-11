@@ -13,7 +13,9 @@ class SampleModelWithFK(models.Model):
 
 class SampleModelForAutofilter(models.Model):
     fk = models.ForeignKey(SampleModel, related_name="fk_1", on_delete=models.CASCADE)
-    non_indexed_fk = models.ForeignKey(SampleModel, related_name="fk_2", db_index=False, on_delete=models.CASCADE)
+    non_indexed_fk = models.ForeignKey(
+        SampleModel, related_name="fk_2", db_index=False, on_delete=models.CASCADE
+    )
     indexed_int = models.IntegerField(db_index=True)
     non_indexed_int = models.IntegerField()
     indexed_char = models.CharField(max_length=255, db_index=True)
@@ -38,12 +40,20 @@ class ThirdLevelModelForNestedFilteringTest(models.Model):
 
 class SecondLevelModelForContextPassingTest(models.Model):
     name = models.CharField(max_length=255)
-    third = models.ForeignKey(ThirdLevelModelForNestedFilteringTest, related_name="second", null=True,
-                              on_delete=models.CASCADE)
+    third = models.ForeignKey(
+        ThirdLevelModelForNestedFilteringTest,
+        related_name="second",
+        null=True,
+        on_delete=models.CASCADE,
+    )
 
 
 class TopLevelModelForContextPassingTest(models.Model):
-    second = models.ForeignKey(SecondLevelModelForContextPassingTest, related_name="top", on_delete=models.CASCADE)
+    second = models.ForeignKey(
+        SecondLevelModelForContextPassingTest,
+        related_name="top",
+        on_delete=models.CASCADE,
+    )
     name = models.CharField(max_length=255)
 
 
@@ -54,12 +64,18 @@ class AutoOptimization3Model(models.Model):
 
 class AutoOptimization2Model(models.Model):
     name = models.CharField(max_length=255)
-    fk_3_1 = models.ForeignKey(AutoOptimization3Model, related_name="reverse_2_1", on_delete=models.CASCADE)
-    fk_3_2 = models.ForeignKey(AutoOptimization3Model, related_name="reverse_2_2", on_delete=models.CASCADE)
+    fk_3_1 = models.ForeignKey(
+        AutoOptimization3Model, related_name="reverse_2_1", on_delete=models.CASCADE
+    )
+    fk_3_2 = models.ForeignKey(
+        AutoOptimization3Model, related_name="reverse_2_2", on_delete=models.CASCADE
+    )
     sample = models.ForeignKey(SampleModel, on_delete=models.CASCADE)
 
 
 class AutoOptimization1Model(models.Model):
     name = models.CharField(max_length=255)
-    fk_2 = models.ForeignKey(AutoOptimization2Model, related_name="reverse_1", on_delete=models.CASCADE)
+    fk_2 = models.ForeignKey(
+        AutoOptimization2Model, related_name="reverse_1", on_delete=models.CASCADE
+    )
     sample_m2m = models.ManyToManyField(SampleModel)

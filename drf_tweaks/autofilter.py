@@ -14,8 +14,11 @@ def autofilter(extra_ordering=None, extra_filter=None, exclude_fields=None):
         for serializer_field in serializer_class()._readable_fields:
             name = serializer_field.field_name
             try:
-                if name == "id" or getattr(model_cls._meta.get_field(name), "db_index", False) \
-                        or getattr(model_cls._meta.get_field(name), "unique", False):
+                if (
+                    name == "id"
+                    or getattr(model_cls._meta.get_field(name), "db_index", False)
+                    or getattr(model_cls._meta.get_field(name), "unique", False)
+                ):
                     if exclude_fields is None or name not in exclude_fields:
                         fields.add(name)
             except FieldDoesNotExist:
@@ -23,7 +26,9 @@ def autofilter(extra_ordering=None, extra_filter=None, exclude_fields=None):
 
         # add ordering & filtering backends
         if getattr(cls, "filter_backends", None):
-            cls.filter_backends = list(set(cls.filter_backends) | {DjangoFilterBackend, filters.OrderingFilter})
+            cls.filter_backends = list(
+                set(cls.filter_backends) | {DjangoFilterBackend, filters.OrderingFilter}
+            )
         else:
             cls.filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
 
@@ -61,18 +66,23 @@ def autofilter(extra_ordering=None, extra_filter=None, exclude_fields=None):
             try:
                 field = model_cls._meta.get_field(key)
                 new_filters[key] = ["exact", "gt", "gte", "lt", "lte", "in", "isnull"]
-                if isinstance(field, models.CharField) or isinstance(field, models.TextField):
+                if isinstance(field, models.CharField) or isinstance(
+                    field, models.TextField
+                ):
                     new_filters[key] += ["icontains", "istartswith"]
             except FieldDoesNotExist:
                 pass
 
         if update_class:
+
             class new_filter_class(cls.filter_class):
                 class Meta(cls.filter_class.Meta):
                     fields = new_filters
+
             cls.filter_class = new_filter_class
         else:
             cls.filter_fields = new_filters
 
         return cls
+
     return wrapped

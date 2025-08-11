@@ -11,8 +11,11 @@ from rest_framework.test import APIRequestFactory
 from rest_framework.test import APITestCase
 
 from drf_tweaks.serializers import ModelSerializer, pass_context
-from tests.models import (SecondLevelModelForContextPassingTest, TopLevelModelForContextPassingTest,
-                          ThirdLevelModelForNestedFilteringTest)
+from tests.models import (
+    SecondLevelModelForContextPassingTest,
+    TopLevelModelForContextPassingTest,
+    ThirdLevelModelForNestedFilteringTest,
+)
 
 
 factory = APIRequestFactory()
@@ -68,7 +71,14 @@ class TopLevelSerializer(ModelSerializer):
 
     class Meta:
         model = TopLevelModelForContextPassingTest
-        fields = ["name", "context_value", "second", "second_data", "on_demand_field", "second_on_demand_field"]
+        fields = [
+            "name",
+            "context_value",
+            "second",
+            "second_data",
+            "on_demand_field",
+            "second_on_demand_field",
+        ]
         on_demand_fields = ["on_demand_field", "second_on_demand_field"]
 
 
@@ -76,7 +86,9 @@ class SecondLevelV2Serializer(SecondLevelSerializer):
     third_data = serializers.SerializerMethodField()
 
     def get_third_data(self, obj):
-        return ThirdLevelSerializer(obj.third, context=pass_context("third_data", self.context)).data
+        return ThirdLevelSerializer(
+            obj.third, context=pass_context("third_data", self.context)
+        ).data
 
     class Meta:
         model = SecondLevelModelForContextPassingTest
@@ -88,11 +100,20 @@ class TopLevelV2Serializer(TopLevelSerializer):
     second_data = serializers.SerializerMethodField()
 
     def get_second_data(self, obj):
-        return SecondLevelV2Serializer(obj.second, context=pass_context("second_data", self.context)).data
+        return SecondLevelV2Serializer(
+            obj.second, context=pass_context("second_data", self.context)
+        ).data
 
     class Meta:
         model = TopLevelModelForContextPassingTest
-        fields = ["name", "context_value", "second", "second_data", "on_demand_field", "second_on_demand_field"]
+        fields = [
+            "name",
+            "context_value",
+            "second",
+            "second_data",
+            "on_demand_field",
+            "second_on_demand_field",
+        ]
         on_demand_fields = ["on_demand_field", "second_on_demand_field"]
 
 
@@ -109,44 +130,57 @@ class SampleV2API(RetrieveUpdateAPIView):
 
 
 urlpatterns = [
-    re_path(r"^test-context-passing/(?P<pk>[\d]+)$", SampleAPI.as_view(), name="test-context-passing"),
-    re_path(r"^test-context-passing-v2/(?P<pk>[\d]+)$", SampleV2API.as_view(), name="test-context-passing-v2"),
+    re_path(
+        r"^test-context-passing/(?P<pk>[\d]+)$",
+        SampleAPI.as_view(),
+        name="test-context-passing",
+    ),
+    re_path(
+        r"^test-context-passing-v2/(?P<pk>[\d]+)$",
+        SampleV2API.as_view(),
+        name="test-context-passing-v2",
+    ),
 ]
 
 
 @override_settings(ROOT_URLCONF="tests.test_serializers_context_passing")
 class ContextPassingTestCase(APITestCase):
     def setUp(self):
-        self.second = SecondLevelModelForContextPassingTest.objects.create(name="second")
-        self.top = TopLevelModelForContextPassingTest.objects.create(second=self.second, name="top")
+        self.second = SecondLevelModelForContextPassingTest.objects.create(
+            name="second"
+        )
+        self.top = TopLevelModelForContextPassingTest.objects.create(
+            second=self.second, name="top"
+        )
 
     def test_context_passing(self):
-        response = self.client.get(reverse("test-context-passing", kwargs={"pk": self.top.pk}))
+        response = self.client.get(
+            reverse("test-context-passing", kwargs={"pk": self.top.pk})
+        )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
-            response.data, {
+            response.data,
+            {
                 "name": "top",
                 "context_value": "none",
                 "second": 1,
-                "second_data": {
-                    "name": "second",
-                    "context_value": "none_second"
-                }
-            }
+                "second_data": {"name": "second", "context_value": "none_second"},
+            },
         )
 
-        response = self.client.get(reverse("test-context-passing", kwargs={"pk": self.top.pk}), {"test_value": "abc"})
+        response = self.client.get(
+            reverse("test-context-passing", kwargs={"pk": self.top.pk}),
+            {"test_value": "abc"},
+        )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
-            response.data, {
+            response.data,
+            {
                 "name": "top",
                 "context_value": "abc",
                 "second": 1,
-                "second_data": {
-                    "name": "second",
-                    "context_value": "abc_second"
-                }
-            }
+                "second_data": {"name": "second", "context_value": "abc_second"},
+            },
         )
 
 
@@ -154,59 +188,66 @@ class ContextPassingTestCase(APITestCase):
 class OnDemandFieldsAndNestedFieldsFilteringTestCase(APITestCase):
     def setUp(self):
         self.third = ThirdLevelModelForNestedFilteringTest.objects.create(name="third")
-        self.second = SecondLevelModelForContextPassingTest.objects.create(name="second", third=self.third)
-        self.top = TopLevelModelForContextPassingTest.objects.create(second=self.second, name="top")
+        self.second = SecondLevelModelForContextPassingTest.objects.create(
+            name="second", third=self.third
+        )
+        self.top = TopLevelModelForContextPassingTest.objects.create(
+            second=self.second, name="top"
+        )
 
     def inner_test_on_demand_field(self, cp_url):
         # w/o specifying on demand fields - fields are not included
         response = self.client.get(cp_url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
-            response.data, {
+            response.data,
+            {
                 "name": "top",
                 "context_value": "none",
                 "second": 1,
-                "second_data": {
-                    "name": "second",
-                    "context_value": "none_second"
-                }
-            }
+                "second_data": {"name": "second", "context_value": "none_second"},
+            },
         )
 
         # when added "include_fields=on_demand_fields - field is included
         response = self.client.get(cp_url, {"include_fields": "on_demand_field"})
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
-            response.data, {
+            response.data,
+            {
                 "name": "top",
                 "context_value": "none",
                 "second": 1,
                 "on_demand_field": "on_demand",
-                "second_data": {
-                    "name": "second",
-                    "context_value": "none_second"
-                }
-            }
+                "second_data": {"name": "second", "context_value": "none_second"},
+            },
         )
 
         # using fields
-        response = self.client.get(cp_url, {"fields": "name,on_demand_field,second_on_demand_field"})
+        response = self.client.get(
+            cp_url, {"fields": "name,on_demand_field,second_on_demand_field"}
+        )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
-            response.data, {
+            response.data,
+            {
                 "name": "top",
                 "on_demand_field": "on_demand",
-                "second_on_demand_field": "second_on_demand"
-            }
+                "second_on_demand_field": "second_on_demand",
+            },
         )
 
         # nested include_fields
-        response = self.client.get(cp_url, {
-            "include_fields": "on_demand_field,second_on_demand_field,second_data__on_demand_field"
-        })
+        response = self.client.get(
+            cp_url,
+            {
+                "include_fields": "on_demand_field,second_on_demand_field,second_data__on_demand_field"
+            },
+        )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
-            response.data, {
+            response.data,
+            {
                 "name": "top",
                 "context_value": "none",
                 "second": 1,
@@ -216,44 +257,56 @@ class OnDemandFieldsAndNestedFieldsFilteringTestCase(APITestCase):
                     "name": "second",
                     "context_value": "none_second",
                     "on_demand_field": "on_demand",
-                }
-            }
+                },
+            },
         )
 
         # using fields: nested
-        response = self.client.get(cp_url, {
-            "fields": "name,on_demand_field,second_data__name,second_data__on_demand_field"
-        })
+        response = self.client.get(
+            cp_url,
+            {
+                "fields": "name,on_demand_field,second_data__name,second_data__on_demand_field"
+            },
+        )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
-            response.data, {
+            response.data,
+            {
                 "name": "top",
                 "on_demand_field": "on_demand",
                 "second_data": {
                     "name": "second",
                     "on_demand_field": "on_demand",
-                }
-            }
+                },
+            },
         )
 
         # using fields & include_fields (on different levels) & on three levels
-        response = self.client.get(cp_url, {
-            "fields": "name,second_data,second_data__third_data",
-            "include_fields": "second_data__third_data__on_demand_field"
-        })
+        response = self.client.get(
+            cp_url,
+            {
+                "fields": "name,second_data,second_data__third_data",
+                "include_fields": "second_data__third_data__on_demand_field",
+            },
+        )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
-            response.data, {
+            response.data,
+            {
                 "name": "top",
                 "second_data": {
                     "third_data": {
                         "name": "third",
-                        "on_demand_field": "on_demand_third"
+                        "on_demand_field": "on_demand_third",
                     }
-                }
-            }
+                },
+            },
         )
 
     def test_on_demand_fields(self):
-        self.inner_test_on_demand_field(reverse("test-context-passing", kwargs={"pk": self.top.pk}))
-        self.inner_test_on_demand_field(reverse("test-context-passing-v2", kwargs={"pk": self.top.pk}))
+        self.inner_test_on_demand_field(
+            reverse("test-context-passing", kwargs={"pk": self.top.pk})
+        )
+        self.inner_test_on_demand_field(
+            reverse("test-context-passing-v2", kwargs={"pk": self.top.pk})
+        )
