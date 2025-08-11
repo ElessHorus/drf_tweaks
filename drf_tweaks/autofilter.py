@@ -1,3 +1,4 @@
+from contextlib import suppress
 from copy import copy
 from django.core.exceptions import FieldDoesNotExist
 from django.db import models
@@ -13,7 +14,7 @@ def autofilter(extra_ordering=None, extra_filter=None, exclude_fields=None):
         fields = set()
         for serializer_field in serializer_class()._readable_fields:
             name = serializer_field.field_name
-            try:
+            with suppress(FieldDoesNotExist):
                 if (
                     name == "id"
                     or getattr(model_cls._meta.get_field(name), "db_index", False)
@@ -21,8 +22,6 @@ def autofilter(extra_ordering=None, extra_filter=None, exclude_fields=None):
                 ):
                     if exclude_fields is None or name not in exclude_fields:
                         fields.add(name)
-            except FieldDoesNotExist:
-                pass
 
         # add ordering & filtering backends
         if getattr(cls, "filter_backends", None):

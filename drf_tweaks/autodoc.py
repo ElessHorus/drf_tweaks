@@ -76,14 +76,14 @@ class PaginationAutodoc(AutodocBase):
     @classmethod
     def _generate_text(cls, documented_cls, method_name):
         params = []
+
         if hasattr(documented_cls, "pagination_class"):
             for item_name in dir(documented_cls.pagination_class):
                 if item_name.endswith("_query_param") and getattr(
                     documented_cls.pagination_class, item_name, None
                 ):
                     params.append(
-                        "%s -- optional, %s"
-                        % (
+                        "{} -- optional, {}".format(
                             getattr(documented_cls.pagination_class, item_name),
                             item_name.replace("_query_param", ""),
                         )
@@ -109,9 +109,9 @@ class PermissionsAutodoc(AutodocBase):
         ):
             text = "<b>Permissions:</b>\n"
             for permission_cls in documented_cls.permission_classes:
-                text += "<i>%s</i>\n" % permission_cls.__name__
+                text += f"<i>{permission_cls.__name__}</i>\n"
                 if permission_cls.__doc__:
-                    text += "%s\n" % permission_cls.__doc__
+                    text += f"{permission_cls.__doc__}\n"
         return text
 
 
@@ -125,10 +125,13 @@ class VersioningAutodoc(AutodocBase):
     def _generate_yaml(cls, documented_cls, method_name):
         versions = []
         if hasattr(documented_cls, "versioning_serializer_classess"):
-            for version in sorted(
-                documented_cls.versioning_serializer_classess.keys(), reverse=True
-            ):
-                versions.append("\t- application/json; version=%d" % version)
+            versions.extend(
+                f"application/json; version={version}"
+                for version in sorted(
+                    documented_cls.versioning_serializer_classess.keys(), reverse=True
+                )
+            )
+
         if versions:
             return "produces:\n" + "\n".join(versions)
         return ""
@@ -140,12 +143,10 @@ class VersioningAutodoc(AutodocBase):
             deprecated, obsolete = documented_cls.get_deprecated_and_obsolete_versions()
             if deprecated and deprecated > 0:
                 text += (
-                    "\nVersions lower or equal to %d are <b>deprecated</b>" % deprecated
+                    "\nVersions lower or equal to {deprecated} are <b>deprecated</b>"
                 )
             if obsolete and obsolete > 0:
-                text += (
-                    "\n\nVersions lower or equal to %d are <b>obsolete</b>" % obsolete
-                )
+                text += "\n\nVersions lower or equal to {obsolete} are <b>obsolete</b>"
         return text
 
 
@@ -163,6 +164,7 @@ class OrderingAndFilteringAutodoc(AutodocBase):
         text = "\n\n<b>Limiting response fields</b>\n\n\twill limit response to only requested fields.\n\n\t"
         text += "usage: ?fields=FIELD_NAME_1,FIELD_NAME_2\n\n\n\n"
         ordering_fields = getattr(documented_cls, "ordering_fields", None)
+
         if ordering_fields:
             text += "<b>Sorting:</b>\n\n\tusage: ?ordering=FIELD_NAME,-OTHER_FIELD_NAME\n\n\tavailable fields: "
             text += ", ".join(sorted(ordering_fields))
@@ -171,6 +173,7 @@ class OrderingAndFilteringAutodoc(AutodocBase):
         filter_class = getattr(documented_cls, "filter_class", None)
         if filter_class:
             filter_fields = filter_class.Meta.fields
+
         if filter_fields:
             if ordering_fields:
                 text += "\n\n\n\n"
@@ -185,7 +188,7 @@ class OrderingAndFilteringAutodoc(AutodocBase):
                     )
             else:
                 for field in sorted(filter_fields):
-                    text += "\n\n\t%s: exact" % field
+                    text += f"\n\n\t{field}: exact"
 
         return text
 
@@ -205,9 +208,9 @@ class OnDemandFieldsAutodoc(AutodocBase):
         if not on_demand_fields:
             return ""
 
-        on_demand_fields = sorted(on_demand_fields)
+        on_demand_fields.sort()
         text = "\n\n<b>Access to on demand fields</b>\n\n\tavailable fields: "
-        text += "{}\n\n".format(", ".join(on_demand_fields))
+        text += f"{', '.join(on_demand_fields)}\n\n"
         return text
 
     @classmethod
@@ -220,15 +223,15 @@ class BaseInfoAutodoc(AutodocBase):
 
     @classmethod
     def _generate_yaml(cls, documented_cls, method_name):
-        if hasattr(documented_cls, "get_custom_%s_doc_yaml" % method_name):
-            return getattr(documented_cls, "get_custom_%s_doc_yaml" % method_name)()
+        if hasattr(documented_cls, f"get_custom_{method_name}_doc_yaml"):
+            return getattr(documented_cls, f"get_custom_{method_name}_doc_yaml")()
         else:
             return ""
 
     @classmethod
     def _generate_text(cls, documented_cls, method_name):
-        if hasattr(documented_cls, "get_custom_%s_doc" % method_name):
-            return getattr(documented_cls, "get_custom_%s_doc" % method_name)()
+        if hasattr(documented_cls, f"get_custom_{method_name}_doc"):
+            return getattr(documented_cls, f"get_custom_{method_name}_doc")()
         else:
             return ""
 
