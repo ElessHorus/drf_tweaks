@@ -27,9 +27,11 @@ def test_queries_locking_single_tables():
 
 @pytest.mark.django_db
 def test_query_locking_multiple_tables():
-    with pytest.raises(WouldSelectMultipleTablesForUpdate):
-        with query_lock_limiter(enable=True):
-            list(SampleModelWithFK.objects.filter(parent__a="").select_for_update())
+    with (
+        pytest.raises(WouldSelectMultipleTablesForUpdate),
+        query_lock_limiter(enable=True),
+    ):
+        list(SampleModelWithFK.objects.filter(parent__a="").select_for_update())
 
 
 @pytest.mark.django_db
@@ -41,9 +43,11 @@ def test_query_locking_whitelisted_multiple_tables():
 
 @pytest.mark.django_db
 def test_query_select_related_and_for_update():
-    with pytest.raises(WouldSelectMultipleTablesForUpdate):
-        with query_lock_limiter(enable=True):
-            list(SampleModelWithFK.objects.select_related().select_for_update())
+    with (
+        pytest.raises(WouldSelectMultipleTablesForUpdate),
+        query_lock_limiter(enable=True),
+    ):
+        list(SampleModelWithFK.objects.select_related().select_for_update())
 
 
 @pytest.mark.django_db

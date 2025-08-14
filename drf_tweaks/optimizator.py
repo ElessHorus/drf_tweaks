@@ -18,14 +18,13 @@ def check_if_related_object(model_field):
                 related_descriptors.ReverseOneToOneDescriptor,
             )
         )
-    else:
-        return any(
-            isinstance(model_field, x)
-            for x in (
-                related_descriptors.SingleRelatedObjectDescriptor,
-                related_descriptors.ReverseSingleRelatedObjectDescriptor,
-            )
+    return any(
+        isinstance(model_field, x)
+        for x in (
+            related_descriptors.SingleRelatedObjectDescriptor,
+            related_descriptors.ReverseSingleRelatedObjectDescriptor,
         )
+    )
 
 
 def check_if_prefetch_object(model_field):
@@ -37,15 +36,14 @@ def check_if_prefetch_object(model_field):
                 related_descriptors.ReverseManyToOneDescriptor,
             )
         )
-    else:
-        return any(
-            isinstance(model_field, x)
-            for x in (
-                related_descriptors.ManyRelatedObjectsDescriptor,
-                related_descriptors.ForeignRelatedObjectsDescriptor,
-                related_descriptors.ReverseManyRelatedObjectsDescriptor,
-            )
+    return any(
+        isinstance(model_field, x)
+        for x in (
+            related_descriptors.ManyRelatedObjectsDescriptor,
+            related_descriptors.ForeignRelatedObjectsDescriptor,
+            related_descriptors.ReverseManyRelatedObjectsDescriptor,
         )
+    )
 
 
 def run_autooptimization_discovery(

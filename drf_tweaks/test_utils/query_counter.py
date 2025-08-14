@@ -90,7 +90,7 @@ class query_counter:
                 raise TooManySQLQueriesException(
                     "Too many queries executed: %d" % test_query_counter
                 )
-            elif test_query_counter > getattr(
+            if test_query_counter > getattr(
                 settings, "TEST_QUERY_NUMBER_SHOW_WARNING", 10
             ):
                 warnings.warn(
