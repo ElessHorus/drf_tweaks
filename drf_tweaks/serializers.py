@@ -11,15 +11,6 @@ from rest_framework.fields import (
 from rest_framework.serializers import as_serializer_error, PKOnlyObject
 
 
-def filter_fields(field_name, fields):
-    filtered_fields = set()
-    for field in fields:
-        parts = field.split("__", 1)
-        if len(parts) == 2 and parts[0] == field_name:
-            filtered_fields.add(parts[1])
-    return filtered_fields
-
-
 class ContextPassing:
     def __init__(self, field, parent, only_fields, include_fields):
         self.field = field
@@ -79,6 +70,15 @@ class ContextPassing:
                 self.field.child._context = self.old_context
             else:
                 self.field._context = self.old_context
+
+
+def filter_fields(field_name, fields):
+    filtered_fields = set()
+    for field in fields:
+        parts = field.split("__", 1)
+        if len(parts) == 2 and parts[0] == field_name:
+            filtered_fields.add(parts[1])
+    return filtered_fields
 
 
 def pass_context(field_name, context):

@@ -10,14 +10,13 @@ class AsymetricRelatedField(serializers.PrimaryKeyRelatedField):
     With this, we can use id in POST and have serialized data in GET.
     """
 
-    def __init__(self, serializer_class, *args, serializer_kwargs=None, **kwargs):
+    def __init__(self, serializer_class, *args, **kwargs):
         """
         :param serializer_class: serializer for data representation. Can be string or serializer class.
         If it's string, set absolute path of the serializer class.
         :param serializer_kwargs: set it if serializer_class need parameters, defaults to None
         """
         self.__serializer_class = serializer_class
-        self.serializer_kwargs = serializer_kwargs or {}
         super().__init__(*args, **kwargs)
 
     @property
