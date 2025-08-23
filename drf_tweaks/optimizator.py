@@ -144,13 +144,13 @@ class BaseOptimizer:
             return SerializerMethodFieldAutoOptimizer(
                 child_only_fields, child_include_fields
             )
-        elif field_type == PrimaryKeyRelatedField:
+        if field_type == PrimaryKeyRelatedField:
             return PrimaryKeyRelatedFieldAutoOptimizer(
                 child_only_fields, child_include_fields
             )
-        elif field_type == RelatedField:
+        if field_type == RelatedField:
             return SimpleRelationAutoOptimizer(child_only_fields, child_include_fields)
-        elif field_type == AsymetricRelatedField:
+        if field_type == AsymetricRelatedField:
             return AsymetricRelatedFieldAutoOptimizer(
                 child_only_fields, child_include_fields
             )
@@ -438,3 +438,6 @@ class Optimizer(BaseOptimizer):
         _logger.debug(f"Select related fields: {select_fields}")
         _logger.debug(f"Prefetch related fields: {prefetch_fields}")
         return select_fields, prefetch_fields
+
+    def __call__(self, *args, **kwds):
+        return self.run(*args, **kwds)
