@@ -12,7 +12,7 @@ from rest_framework.serializers import (
     SerializerMethodField,
 )
 
-from .serializers import AsymetricRelatedField
+from .fields import AsymetricRelatedField
 
 _logger = logging.getLogger(__name__)
 
@@ -120,6 +120,7 @@ class BaseOptimizer:
             return serializer.check_if_needs_serialization(
                 field_name, self.only_fields, self.include_fields, on_demand_fields
             )
+        return False
 
     def get_optimizer(self, field: object, field_name: str):
         """
@@ -165,6 +166,7 @@ class BaseOptimizer:
             return ManyRelatedFieldAutoOptimizer(
                 child_only_fields, child_include_fields
             )
+        return None
 
     def optimize(self, *args, **kwargs):
         raise NotImplementedError
