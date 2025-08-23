@@ -15,13 +15,13 @@ def autofilter(extra_ordering=None, extra_filter=None, exclude_fields=None):
         for serializer_field in serializer_class()._readable_fields:
             name = serializer_field.field_name
             with suppress(FieldDoesNotExist):
+                field = model_cls._meta.get_field(name)
                 if (
                     name == "id"
-                    or getattr(model_cls._meta.get_field(name), "db_index", False)
-                    or getattr(model_cls._meta.get_field(name), "unique", False)
-                ):
-                    if exclude_fields is None or name not in exclude_fields:
-                        fields.add(name)
+                    or getattr(field, "db_index", False)
+                    or getattr(field, "unique", False)
+                ) and (exclude_fields is None or name not in exclude_fields):
+                    fields.add(name)
 
         # add ordering & filtering backends
         if getattr(cls, "filter_backends", None):

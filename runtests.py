@@ -61,7 +61,7 @@ def isort_main(args):
 
 def split_class_and_function(string):
     class_string, function_string = string.split(".", 1)
-    return "{} and {}".format(class_string, function_string)
+    return f"{class_string} and {function_string}"
 
 
 def is_function(string):

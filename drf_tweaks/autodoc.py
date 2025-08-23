@@ -63,9 +63,12 @@ class AutodocBase:
 
 
 class PaginationAutodoc(AutodocBase):
-    """Autodoc for pagination - applied only when pagination is present. Please not that pagination is present by
-    default, so to avoid having pagination params in retrieve-type generics, you have to explicitly put there
-    pagination_class = None"""
+    """
+    Autodoc for pagination - applied only when pagination is present.
+    Please not that pagination is present by default,
+    so to avoid having pagination params in retrieve-type generics,
+    you have to explicitly put there pagination_class = None
+    """
 
     applies_to = ("get",)
 
@@ -221,21 +224,22 @@ class OnDemandFieldsAutodoc(AutodocBase):
 
 
 class BaseInfoAutodoc(AutodocBase):
-    """insert the base docstring to each method - this will be displayed on the swagger folded list"""
+    """
+    Insert the base docstring to each method.
+    This will be displayed on the swagger folded list.
+    """
 
     @classmethod
     def _generate_yaml(cls, documented_cls, method_name):
         if hasattr(documented_cls, f"get_custom_{method_name}_doc_yaml"):
             return getattr(documented_cls, f"get_custom_{method_name}_doc_yaml")()
-        else:
-            return ""
+        return ""
 
     @classmethod
     def _generate_text(cls, documented_cls, method_name):
         if hasattr(documented_cls, f"get_custom_{method_name}_doc"):
             return getattr(documented_cls, f"get_custom_{method_name}_doc")()
-        else:
-            return ""
+        return ""
 
     @classmethod
     def update_docstring(cls, documented_cls, base_doc, docstring, method_name):
@@ -295,19 +299,18 @@ def autodoc(
         for autodoc_class in classess_to_apply:
             applies_to |= set(autodoc_class.applies_to)
 
-        # Create facades for original methods - docstring of methods are immutable, so we need to change docstring of
-        # functions. But without shadowing the method.__func__ will point to the same function for classes that
-        # inherits them from the same parents.
+        # Create facades for original methods - docstring of methods are immutable,
+        # so we need to change docstring of # functions.
+        # But without shadowing the method.__func__ will point to the same function
+        # for classes that inherits them from the same parents.
         for method_name in applies_to:
-            method = getattr(cls, method_name, None)
-            if method:
+            if (method := getattr(cls, method_name, None)):
                 copy_method(cls, method_name, method)
 
         # update docstrings
         for autodoc_class in classess_to_apply:
             for method_name in autodoc_class.applies_to:
-                method = getattr(cls, method_name, None)
-                if method:
+                if (method := getattr(cls, method_name, None)):
                     method.__doc__ = autodoc_class.update_docstring(
                         cls,
                         base_doc,
