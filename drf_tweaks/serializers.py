@@ -1,3 +1,4 @@
+from collections.abc import Mapping
 from copy import copy
 from rest_framework import serializers
 from rest_framework.fields import (
@@ -11,15 +12,6 @@ from rest_framework.serializers import as_serializer_error, PKOnlyObject
 
 
 class ContextPassing:
-    @classmethod
-    def filter_fields(cls, field_name, fields):
-        filtered_fields = set()
-        for field in fields:
-            parts = field.split("__", 1)
-            if len(parts) == 2 and parts[0] == field_name:
-                filtered_fields.add(parts[1])
-        return filtered_fields
-
     def __init__(self, field, parent, only_fields, include_fields):
         self.field = field
         self.parent = parent
@@ -29,8 +21,8 @@ class ContextPassing:
         self.has_context = isinstance(field, serializers.Serializer) or self.is_many
         if self.has_context:
             self.old_context = None
-            self.only_fields = self.filter_fields(field.field_name, only_fields)
-            self.include_fields = self.filter_fields(field.field_name, include_fields)
+            self.only_fields = filter_fields(field.field_name, only_fields)
+            self.include_fields = filter_fields(field.field_name, include_fields)
             self.on_exit_delete_fields = False
             self.on_exit_delete_include_fields = False
             self.old_fields = None
@@ -80,6 +72,15 @@ class ContextPassing:
                 self.field._context = self.old_context
 
 
+def filter_fields(field_name, fields):
+    filtered_fields = set()
+    for field in fields:
+        parts = field.split("__", 1)
+        if len(parts) == 2 and parts[0] == field_name:
+            filtered_fields.add(parts[1])
+    return filtered_fields
+
+
 def pass_context(field_name, context):
     new_context = copy(context)
     query_params = context["request"].query_params if "request" in context else {}
@@ -88,10 +89,8 @@ def pass_context(field_name, context):
         context.get("include_fields", query_params.get("include_fields", "").split(","))
     )
 
-    new_context["fields"] = ContextPassing.filter_fields(field_name, only_fields)
-    new_context["include_fields"] = ContextPassing.filter_fields(
-        field_name, include_fields
-    )
+    new_context["fields"] = filter_fields(field_name, only_fields)
+    new_context["include_fields"] = filter_fields(field_name, include_fields)
 
     return new_context
 
@@ -110,22 +109,21 @@ class SerializerCustomizationMixin:
             return field.label if field.label else key.title()
 
         for key, field in self.fields.items():
-            if hasattr(field, "error_messages"):
-                field_name = str(get_field_name(key, field))
-                custom_required_message = self.custom_required_errors.get(
-                    key, self.required_error
+            if not hasattr(field, "error_messages"):
+                continue
+            field_name = str(get_field_name(key, field))
+            custom_required_message = self.custom_required_errors.get(
+                key, self.required_error
+            )
+            if custom_required_message:
+                field.error_messages["required"] = custom_required_message.format(
+                    fieldname=field_name
                 )
-                if custom_required_message:
-                    field.error_messages["required"] = custom_required_message.format(
-                        fieldname=field_name
-                    )
-                custom_blank_message = self.custom_blank_errors.get(
-                    key, self.blank_error
+            custom_blank_message = self.custom_blank_errors.get(key, self.blank_error)
+            if custom_blank_message:
+                field.error_messages["blank"] = custom_blank_message.format(
+                    fieldname=field_name
                 )
-                if custom_blank_message:
-                    field.error_messages["blank"] = custom_blank_message.format(
-                        fieldname=field_name
-                    )
 
     # required fields override
     required_fields = []
@@ -147,23 +145,20 @@ class SerializerCustomizationMixin:
     @classmethod
     def add_main_fields_names_from_nested(cls, fields):
         """If you add main_field__secondary_field, main_field should also be in the set."""
-        to_add = set()
-        for field in fields:
-            parts = field.split("__", 1)
-            if len(parts) == 2:
-                to_add.add(parts[0])
-        return fields | to_add
+        return fields | {field.split("__")[0] for field in fields if "__" in field}
 
     # control over which fields get serialized
     def get_fields_for_serialization(self, fields_name):
         fields = set()
         if fields_name in self.context:
             fields = set(self.context[fields_name])
+
         elif (
             "request" in self.context
             and fields_name in self.context["request"].query_params
         ):
             fields = set(self.context["request"].query_params[fields_name].split(","))
+
         return self.add_main_fields_names_from_nested(fields)
 
     def get_only_fields_and_include_fields(self):
@@ -231,11 +226,13 @@ class SerializerCustomizationMixin:
 
     # one-step validation
     def to_internal_value(self, data):
-        if not isinstance(data, dict):
+        if not isinstance(data, Mapping):
             message = self.error_messages["invalid"].format(
-                datatype=type(data).__name__
+                datatype=data.__class__.__name__
             )
-            raise ValidationError({api_settings.NON_FIELD_ERRORS_KEY: [message]})
+            raise ValidationError(
+                {api_settings.NON_FIELD_ERRORS_KEY: [message]}, code="invalid"
+            )
 
         ret = {}
         errors = {}
@@ -285,8 +282,8 @@ class SerializerCustomizationMixin:
         # if there were any errors - raise the combination of them
         if to_internal_errors or validators_errors or validation_errors:
             # update dicts in reverse - to show most basic error for a given field if errors overlap
-            validation_errors.update(validators_errors)
-            validation_errors.update(to_internal_errors)
+            validation_errors |= validators_errors
+            validation_errors |= to_internal_errors
             raise ValidationError(detail=validation_errors)
 
         return value

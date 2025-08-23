@@ -2,7 +2,7 @@ import logging
 
 from django.db.models.fields import related_descriptors
 
-from drf_tweaks.serializers import ContextPassing
+from drf_tweaks.serializers import filter_fields
 from rest_framework.serializers import (
     BaseSerializer,
     ListSerializer,
@@ -69,7 +69,7 @@ class BaseOptimizer:
         :param fields_to_serialize: list of fields to serialize
         """
         if fields_to_serialize is not None:
-            return ContextPassing.filter_fields(field_name, fields_to_serialize)
+            return filter_fields(field_name, fields_to_serialize)
         return None
 
     @staticmethod
