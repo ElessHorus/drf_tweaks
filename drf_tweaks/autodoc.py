@@ -82,11 +82,13 @@ class PaginationAutodoc(AutodocBase):
                 if item_name.endswith("_query_param") and getattr(
                     documented_cls.pagination_class, item_name, None
                 ):
-                    params.append(
-                        "{} -- optional, {}".format(
-                            getattr(documented_cls.pagination_class, item_name),
-                            item_name.replace("_query_param", ""),
-                        )
+                    params.extend(
+                        [
+                            "{} -- optional, {}".format(
+                                getattr(documented_cls.pagination_class, item_name),
+                                item_name.replace("_query_param", ""),
+                            )
+                        ]
                     )
         return "\n".join(params)
 
@@ -126,7 +128,7 @@ class VersioningAutodoc(AutodocBase):
         versions = []
         if hasattr(documented_cls, "versioning_serializer_classess"):
             versions.extend(
-                f"application/json; version={version}"
+                f"\t- application/json; version={version}"
                 for version in sorted(
                     documented_cls.versioning_serializer_classess.keys(), reverse=True
                 )
@@ -143,10 +145,10 @@ class VersioningAutodoc(AutodocBase):
             deprecated, obsolete = documented_cls.get_deprecated_and_obsolete_versions()
             if deprecated and deprecated > 0:
                 text += (
-                    "\nVersions lower or equal to {deprecated} are <b>deprecated</b>"
+                    f"\nVersions lower or equal to {deprecated} are <b>deprecated</b>"
                 )
             if obsolete and obsolete > 0:
-                text += "\n\nVersions lower or equal to {obsolete} are <b>obsolete</b>"
+                text += f"\n\nVersions lower or equal to {obsolete} are <b>obsolete</b>"
         return text
 
 
