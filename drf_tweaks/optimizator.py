@@ -1,6 +1,6 @@
 from distutils.version import LooseVersion
 from django import get_version
-from drf_tweaks.serializers import ContextPassing
+from drf_tweaks.serializers import filter_fields
 from rest_framework.serializers import ListSerializer, Serializer
 
 try:
@@ -67,7 +67,7 @@ def run_autooptimization_discovery(
 
     def filter_field_name(field_name, fields_to_serialize):
         if fields_to_serialize is not None:
-            return ContextPassing.filter_fields(field_name, fields_to_serialize)
+            return filter_fields(field_name, fields_to_serialize)
         return None
 
     for field_name, field in serializer.fields.items():

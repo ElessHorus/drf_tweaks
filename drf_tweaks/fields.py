@@ -1,7 +1,7 @@
 from importlib import import_module
 
-from .serializers import pass_context
 from rest_framework import serializers
+from .serializers import pass_context
 
 
 class AsymetricRelatedField(serializers.PrimaryKeyRelatedField):
@@ -31,15 +31,10 @@ class AsymetricRelatedField(serializers.PrimaryKeyRelatedField):
         Overwrite method `to_representation()` to use serializer class for data representation.
         Pass context to serializer for using dynamic fields.
         """
-        field_name = (
-            self.field_name if self.field_name != "" else self.parent.field_name
-        )
-        if self.context != {}:
-            query_params = self.context["request"].query_params
-            if field_name in query_params.get("include_fields", []):
-                return self._internal_representation(
-                    value, pass_context(field_name, self.context)
-                ).data
+        if self.context != {} and self.field_name_in_context():
+            return self._internal_representation(
+                value, pass_context(self.field_name, self.context)
+            ).data
         if not isinstance(value, dict):
             return value.pk
         return value["pk"]
@@ -71,14 +66,15 @@ class AsymetricRelatedField(serializers.PrimaryKeyRelatedField):
 
     def use_pk_only_optimization(self):
         """Overwrite for reactive all fields validation for reading."""
-        field_name = (
-            self.field_name if self.field_name != "" else self.parent.field_name
-        )
-        if self.context != {}:
-            query_params = self.context["request"].query_params
-            if field_name in query_params.get("include_fields", []):
-                return False
-        return True
+        return not (self.context != {} and self.field_name_in_context())
+
+    @property
+    def field_name(self):
+        return self.field_name if self.field_name != "" else self.parent.field_name
+
+    def field_name_in_context(self):
+        query_params = self.context["request"].query_params
+        return self.field_name in query_params.get("include_fields", [])
 
     def _internal_representation(self, value, context):
         return self.serializer_class(value, context=context, **self.serializer_kwargs)
