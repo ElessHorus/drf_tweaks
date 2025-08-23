@@ -21,8 +21,8 @@ class ContextPassing:
         self.has_context = isinstance(field, serializers.Serializer) or self.is_many
         if self.has_context:
             self.old_context = None
-            self.only_fields = self.filter_fields(field.field_name, only_fields)
-            self.include_fields = self.filter_fields(field.field_name, include_fields)
+            self.only_fields = filter_fields(field.field_name, only_fields)
+            self.include_fields = filter_fields(field.field_name, include_fields)
             self.on_exit_delete_fields = False
             self.on_exit_delete_include_fields = False
             self.old_fields = None
@@ -228,7 +228,7 @@ class SerializerCustomizationMixin:
     def to_internal_value(self, data):
         if not isinstance(data, Mapping):
             message = self.error_messages["invalid"].format(
-                datatype=type(data).__name__
+                datatype=data.__class__.__name__
             )
             raise ValidationError(
                 {api_settings.NON_FIELD_ERRORS_KEY: [message]}, code="invalid"
@@ -282,8 +282,8 @@ class SerializerCustomizationMixin:
         # if there were any errors - raise the combination of them
         if to_internal_errors or validators_errors or validation_errors:
             # update dicts in reverse - to show most basic error for a given field if errors overlap
-            validation_errors.update(validators_errors)
-            validation_errors.update(to_internal_errors)
+            validation_errors |= validators_errors
+            validation_errors |= to_internal_errors
             raise ValidationError(detail=validation_errors)
 
         return value
