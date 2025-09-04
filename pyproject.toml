@@ -78,7 +78,7 @@ fixable = [
 ]
 
 # Ignore rules.
-ignore = ["TID252",]
+ignore = ["TID252", "E501"]
 
 # Exclude a variety of commonly ignored directories.
 exclude = [
