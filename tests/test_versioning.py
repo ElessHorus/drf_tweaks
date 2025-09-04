@@ -20,7 +20,6 @@ class SampleVersionedApiSerializerVer1(serializers.ModelSerializer):
 
 
 class SampleVersionedApiSerializerVer2(serializers.ModelSerializer):
-
     class Meta:
         model = SampleModel
         fields = ["a", "b"]
@@ -124,7 +123,7 @@ class VersioningApiTestCase(APITestCase):
 
         response = self.client.get(
             reverse("sample_api", kwargs={"pk": self.sample1.pk}),
-            HTTP_ACCEPT="application/json; version=2",
+            headers={"accept": "application/json; version=2"},
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["a"], "a")
@@ -133,7 +132,7 @@ class VersioningApiTestCase(APITestCase):
 
         response = self.client.get(
             reverse("sample_misconfigured_api", kwargs={"pk": self.sample1.pk}),
-            HTTP_ACCEPT="application/json; version=1",
+            headers={"accept": "application/json; version=1"},
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["a"], "a")
@@ -148,7 +147,7 @@ class VersioningApiTestCase(APITestCase):
 
         response = self.client.get(
             reverse("sample_default_deprecated_api", kwargs={"pk": self.sample1.pk}),
-            HTTP_ACCEPT="application/json; version=2",
+            headers={"accept": "application/json; version=2"},
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["a"], "a")
@@ -163,7 +162,7 @@ class VersioningApiTestCase(APITestCase):
 
         response = self.client.get(
             reverse("sample_custom_deprecated_api", kwargs={"pk": self.sample1.pk}),
-            HTTP_ACCEPT="application/json; version=2",
+            headers={"accept": "application/json; version=2"},
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["a"], "a")
@@ -173,11 +172,11 @@ class VersioningApiTestCase(APITestCase):
     def test_incorrect_versions(self):
         response = self.client.get(
             reverse("sample_api", kwargs={"pk": self.sample1.pk}),
-            HTTP_ACCEPT="application/json; version=teddybear",
+            headers={"accept": "application/json; version=teddybear"},
         )
         self.assertEqual(response.status_code, 400)
         response = self.client.get(
             reverse("sample_api", kwargs={"pk": self.sample1.pk}),
-            HTTP_ACCEPT="application/json; version=5",
+            headers={"accept": "application/json; version=5"},
         )
         self.assertEqual(response.status_code, 400)

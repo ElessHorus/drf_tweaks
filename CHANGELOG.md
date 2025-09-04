@@ -141,4 +141,3 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 - documentation migrated from md to rst
-

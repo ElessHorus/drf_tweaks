@@ -12,7 +12,6 @@ from rest_framework.test import APIClient, APITestCase
 
 
 class DatabaseAccessLintingAPIClient(APIClient):
-
     def __init__(self, with_lock_limiter=True, *args, **kwargs):
         self.with_lock_limiter = with_lock_limiter
         super().__init__(*args, **kwargs)

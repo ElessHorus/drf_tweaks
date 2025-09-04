@@ -304,13 +304,13 @@ def autodoc(
         # But without shadowing the method.__func__ will point to the same function
         # for classes that inherits them from the same parents.
         for method_name in applies_to:
-            if (method := getattr(cls, method_name, None)):
+            if method := getattr(cls, method_name, None):
                 copy_method(cls, method_name, method)
 
         # update docstrings
         for autodoc_class in classess_to_apply:
             for method_name in autodoc_class.applies_to:
-                if (method := getattr(cls, method_name, None)):
+                if method := getattr(cls, method_name, None):
                     method.__doc__ = autodoc_class.update_docstring(
                         cls,
                         base_doc,

@@ -18,7 +18,7 @@ FLAKE8_ARGS = ["drf_tweaks", "tests", "--ignore=E501"]
 ISORT_ARGS = [
     "--recursive",
     "--check-only",
-    "-o" "uritemplate",
+    "-ouritemplate",
     "-p",
     "tests",
     "drf_tweaks",
