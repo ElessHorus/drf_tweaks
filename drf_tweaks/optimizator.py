@@ -180,16 +180,22 @@ class BaseOptimizer:
         :yield: field name, field object
         """
         for field_name, field in serializer.fields.items():
-            if self.check_if_needs_serialization(
+            if not self.check_if_needs_serialization(
                 serializer, field_name, on_demand_fields
-            ) and (
-                (isinstance(field, self.related_field_class)) or ("." in field.source)
             ):
-                if isinstance(field, AsymetricRelatedField):
-                    if field_name in self.include_fields:
-                        yield field_name, field
-                else:
-                    yield field_name, field
+                continue
+
+            if not (
+                isinstance(field, self.related_field_class) or ("." in field.source)
+            ):
+                continue
+
+            if isinstance(field, AsymetricRelatedField) and (
+                field_name not in self.include_fields
+            ):
+                continue
+
+            yield field_name, field
 
 
 class ManyRelationAutoOptimizer(BaseOptimizer):
@@ -238,24 +244,31 @@ class ManyRelationAutoOptimizer(BaseOptimizer):
 
         model_class = serializer.Meta.model
         on_demand_fields = getattr(serializer, "get_on_demand_fields", set)()
-        for field_name, field in self.get_field_to_handle(serializer, on_demand_fields):
-            if not self.check_if_needs_serialization(
+
+        fields_to_optimize = (
+            (field_name, field)
+            for field_name, field in self.get_field_to_handle(
+                serializer, on_demand_fields
+            )
+            if getattr(model_class, field_name, False)
+            and self.check_if_needs_serialization(
                 serializer, field_name, on_demand_fields
-            ):
-                continue
+            )
+        )
 
-            if not getattr(model_class, field_name, False):
-                continue
-
+        for field_name, field in fields_to_optimize:
             optimizer = self.get_optimizer(field, field_name)
+            if optimizer is None:
+                continue
+
             select_fields, prefetch_fields = optimizer.optimize(
                 field=field,
                 prefix=prefix,
                 model_class=model_class,
                 to_prefetch=to_prefetch,
             )
-            prefetch_related_set = prefetch_related_set.union(prefetch_fields)
-            select_related_set = select_related_set.union(select_fields)
+            prefetch_related_set |= prefetch_fields
+            select_related_set |= select_fields
 
         return select_related_set, prefetch_related_set
 
@@ -401,20 +414,30 @@ class Optimizer(BaseOptimizer):
 
         model_class = serializer.Meta.model
         on_demand_fields = getattr(serializer, "get_on_demand_fields", set)()
-        for field_name, field in self.get_field_to_handle(serializer, on_demand_fields):
-            to_prefetch = force_prefetch
-            if self.check_if_prefetch_object(field):
-                to_prefetch = True
+        fields_to_optimize = (
+            (
+                field_name,
+                field,
+                force_prefetch or self.check_if_prefetch_object(field),
+            )
+            for field_name, field in self.get_field_to_handle(
+                serializer, on_demand_fields
+            )
+        )
 
+        for field_name, field, to_prefetch in fields_to_optimize:
             optimizer = self.get_optimizer(field, field_name)
+            if optimizer is None:
+                continue
+
             select_fields, prefetch_fields = optimizer.optimize(
                 field=field,
                 prefix=prefix,
                 model_class=model_class,
                 to_prefetch=to_prefetch,
             )
-            prefetch_related_set = prefetch_related_set.union(prefetch_fields)
-            select_related_set = select_related_set.union(select_fields)
+            prefetch_related_set |= prefetch_fields
+            select_related_set |= select_fields
 
         return select_related_set, prefetch_related_set
 
