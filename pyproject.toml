@@ -58,10 +58,22 @@ dev = [
 
 [tool.ruff]
 # Enable rules.
-select = ["E", "F", "W", "TID", "ISC", "RET", "PERF", "C4", "SIM", "UP009", "D417"]
+lint.select = [
+  "E",
+  "F",
+  "W",
+  "TID",
+  "ISC",
+  "RET",
+  "PERF",
+  "C4",
+  "SIM",
+  "UP009",
+  "D417"
+]
 
 # Allow autofix rules.
-fixable = [
+lint.fixable = [
   "E",
   "F",
   "W",
@@ -78,7 +90,7 @@ fixable = [
 ]
 
 # Ignore rules.
-ignore = ["TID252", "E501"]
+lint.ignore = ["TID252", "E501"]
 
 # Exclude a variety of commonly ignored directories.
 exclude = [
@@ -109,10 +121,10 @@ exclude = [
 target-version = "py311"
 
 # Ignore `E402` (import violations) in all `__init__.py` files, and in `path/to/file.py`.
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["E402"]
 
-[tool.ruff.flake8-quotes]
+[tool.ruff.lint.flake8-quotes]
 docstring-quotes = "double"
 
 [tool.black]
@@ -154,7 +166,7 @@ line_length = 120
 lines_between_types = 1
 known_django = ["django"]
 known_third_party = ["rest_framework", "rest_framework_simplejwt", "django_filters", "django_extensions", "django_celery_beat", "django_celery_results", "django_cors_headers"]
-sections = ["FUTURE", "STDLIB", "DJANGO", "THIRDPARTY", "PANDAS", "COMMONS", "FIRSTPARTY", "LOCALFOLDER"]
+sections = ["FUTURE", "STDLIB", "DJANGO", "THIRDPARTY", "PANDAS", "FIRSTPARTY", "LOCALFOLDER"]
 
 [tool.ruff.lint.isort]
 lines-between-types = 1
@@ -167,7 +179,6 @@ section-order = [
   "django",
   "third-party",
   "pandas",
-  "commons",
   "first-party",
   "local-folder",
 ]

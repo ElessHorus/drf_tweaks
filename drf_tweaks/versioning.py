@@ -84,11 +84,10 @@ class ApiVersionMixin:
     def get_version(self):
         if hasattr(self.request, "version") and self.request.version is not None:
             try:
-                version = int(self.request.version)
+                return int(self.request.version)
             except ValueError:
                 raise IncorrectVersionException
-
-            return version
+        return None
 
     def get_serializer_class(self):
         if hasattr(self.request, "version") and self.request.version is not None:
@@ -97,7 +96,7 @@ class ApiVersionMixin:
             deprecated, obsolete = self.get_deprecated_and_obsolete_versions()
             if obsolete and version <= obsolete:
                 raise ObsoleteVersionException
-            elif deprecated and version <= deprecated:
+            if deprecated and version <= deprecated:
                 self.request._request.deprecated = True
 
             # choosing serializer class
