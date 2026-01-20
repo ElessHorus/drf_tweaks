@@ -188,6 +188,13 @@ section-order = [
 django = ["django"]
 pandas = ["pandas", "numpy"]
 
+[tool.ty.src]
+exclude = [
+  "tests",
+  "drf_tweaks/test_utils",
+  "drf_tweaks/migrations",
+]
+
 [tool.ty.rules]
 unresolved-attribute = "ignore"
 invalid-method-override = "ignore"
