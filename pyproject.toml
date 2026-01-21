@@ -198,3 +198,9 @@ exclude = [
 [tool.ty.rules]
 unresolved-attribute = "ignore"
 invalid-method-override = "ignore"
+
+[tool.pytest.ini_options]
+markers = [
+    "django_db: Use the django test database fixtures",
+    "utils: Utility test functions",
+]
