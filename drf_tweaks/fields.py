@@ -69,7 +69,7 @@ class AsymetricRelatedField(serializers.PrimaryKeyRelatedField):
         return not (self.context != {} and self.field_name_in_context())
 
     @property
-    def field_name(self):
+    def field_name(self) -> str:
         return self.field_name if self.field_name != "" else self.parent.field_name
 
     def field_name_in_context(self):

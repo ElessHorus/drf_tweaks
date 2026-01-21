@@ -127,7 +127,7 @@ def test_filter_field_name(base_optimizer):
     assert base_optimizer.filter_field_name(field_name, fields_to_serialize) == set()
 
     fields_to_serialize = None
-    assert base_optimizer.filter_field_name(field_name, fields_to_serialize) is None
+    assert base_optimizer.filter_field_name(field_name, fields_to_serialize) == set()
 
 
 @pytest.mark.utils

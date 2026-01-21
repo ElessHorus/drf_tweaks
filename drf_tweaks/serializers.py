@@ -72,9 +72,9 @@ class ContextPassing:
                 self.field._context = self.old_context
 
 
-def filter_fields(field_name, fields):
+def filter_fields(field_name: str, fields: set | None) -> set:
     filtered_fields = set()
-    for field in fields:
+    for field in fields or []:
         parts = field.split("__", 1)
         if len(parts) == 2 and parts[0] == field_name:
             filtered_fields.add(parts[1])
@@ -137,7 +137,7 @@ class SerializerCustomizationMixin:
             fields[f].allow_blank = False
 
         if hasattr(self, "Meta") and hasattr(self.Meta, "read_only_fields"):
-            for f in self.Meta.read_only_fields:
+            for f in self.Meta.read_only_fields:  # ty: ignore not-iterable
                 fields[f].read_only = True
 
         return fields
@@ -174,7 +174,7 @@ class SerializerCustomizationMixin:
 
     def check_if_needs_serialization(
         self, field_name, fields, include_fields, on_demand_fields
-    ):
+    ) -> bool:
         if fields:
             # if fields are defined for a given level, we ignore "include_fields"
             if field_name not in fields:

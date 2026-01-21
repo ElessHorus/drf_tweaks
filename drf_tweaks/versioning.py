@@ -95,7 +95,7 @@ class ApiVersionMixin:
             # choosing serializer class
             if hasattr(self, "versioning_serializer_classess"):
                 try:
-                    return self.versioning_serializer_classess[version]
+                    return self.versioning_serializer_classess[version]  # ty: ignore not-subscriptable
                 except KeyError:
                     raise IncorrectVersionException
 

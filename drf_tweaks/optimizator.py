@@ -61,7 +61,7 @@ class BaseOptimizer:
         )
 
     @staticmethod
-    def filter_field_name(field_name: str, fields_to_serialize: list):
+    def filter_field_name(field_name: str, fields_to_serialize: set | None) -> set:
         """
         Check if field need to be serialized.
 
@@ -70,7 +70,7 @@ class BaseOptimizer:
         """
         if fields_to_serialize is not None:
             return filter_fields(field_name, fields_to_serialize)
-        return None
+        return set()
 
     @staticmethod
     def clean_fields(prefetch_set: set, select_set: set):
@@ -118,7 +118,7 @@ class BaseOptimizer:
         :param on_demand_fields: list of request on demand fields
         """
         if hasattr(serializer, "check_if_needs_serialization"):
-            return serializer.check_if_needs_serialization(
+            return serializer.check_if_needs_serialization(  # ty: ignore call-non-callable
                 field_name, self.only_fields, self.include_fields, on_demand_fields
             )
         return False
