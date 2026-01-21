@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import os
+from pathlib import Path
 import re
 
 from setuptools import setup
@@ -17,8 +18,10 @@ def get_version(package):
     """
     Return package version as listed in `__version__` in `init.py`.
     """
-    with open(os.path.join(package, "__init__.py")).read() as init_py:
-        return re.search("__version__ = ['\"]([^'\"]+)['\"]", init_py).group(1)
+    package_path = Path(package, "__init__.py")
+    version_match = re.compile(r"^__version__ = ['\"]([^'\"]*)['\"]")
+    with open(package_path) as init_py:
+        return version_match.search(init_py.read()).group(1)
 
 
 def get_packages(package):
@@ -27,7 +30,7 @@ def get_packages(package):
     """
     return [
         dirpath
-        for dirpath, dirnames, filenames in os.walk(package)
+        for dirpath, _, _ in os.walk(package)
         if os.path.exists(os.path.join(dirpath, "__init__.py"))
     ]
 
@@ -39,13 +42,15 @@ def get_package_data(package):
     """
     walk = [
         (dirpath.replace(package + os.sep, "", 1), filenames)
-        for dirpath, dirnames, filenames in os.walk(package)
+        for dirpath, _, filenames in os.walk(package)
         if not os.path.exists(os.path.join(dirpath, "__init__.py"))
     ]
 
-    filepaths = []
-    for base, filenames in walk:
-        filepaths.extend([os.path.join(base, filename) for filename in filenames])
+    filepaths = [
+        os.path.join(root, filename)
+        for root, filenames in walk
+        for filename in filenames
+    ]
     return {package: filepaths}
 
 
