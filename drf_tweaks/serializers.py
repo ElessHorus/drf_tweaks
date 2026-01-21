@@ -29,47 +29,49 @@ class ContextPassing:
             self.old_include_fields = None
 
     def __enter__(self):
-        if self.has_context:
-            # context passing
-            if self.is_many:
-                self.old_context = self.field.child._context
-                self.field.child._context = self.parent._context
-            else:
-                self.old_context = self.field._context
-                self.field._context = self.parent._context
+        if not self.has_context:
+            return
+        # context passing
+        if self.is_many:
+            self.old_context = self.field.child._context
+            self.field.child._context = self.parent._context
+        else:
+            self.old_context = self.field._context
+            self.field._context = self.parent._context
 
-            # fields filtering
-            if "fields" in self.parent._context:
-                self.old_fields = self.parent._context["fields"]
-            else:
-                self.on_exit_delete_fields = True
-            self.parent._context["fields"] = self.only_fields
+        # fields filtering
+        if "fields" in self.parent._context:
+            self.old_fields = self.parent._context["fields"]
+        else:
+            self.on_exit_delete_fields = True
+        self.parent._context["fields"] = self.only_fields
 
-            # on demand fields
-            if "include_fields" in self.parent._context:
-                self.old_include_fields = self.parent._context["include_fields"]
-            else:
-                self.on_exit_delete_include_fields = True
-            self.parent._context["include_fields"] = self.include_fields
+        # on demand fields
+        if "include_fields" in self.parent._context:
+            self.old_include_fields = self.parent._context["include_fields"]
+        else:
+            self.on_exit_delete_include_fields = True
+        self.parent._context["include_fields"] = self.include_fields
 
     def __exit__(self, type, value, traceback):
-        if self.has_context:
-            # modification was done on parent's context, so we roll them back before setting the old contexts
-            if self.on_exit_delete_fields:
-                del self.parent._context["fields"]
-            else:
-                self.parent._context["fields"] = self.old_fields
+        if not self.has_context:
+            return
+        # modification was done on parent's context, so we roll them back before setting the old contexts
+        if self.on_exit_delete_fields:
+            del self.parent._context["fields"]
+        else:
+            self.parent._context["fields"] = self.old_fields
 
-            if self.on_exit_delete_include_fields:
-                del self.parent._context["include_fields"]
-            else:
-                self.parent._context["include_fields"] = self.old_include_fields
+        if self.on_exit_delete_include_fields:
+            del self.parent._context["include_fields"]
+        else:
+            self.parent._context["include_fields"] = self.old_include_fields
 
-            # restoring old context
-            if self.is_many:
-                self.field.child._context = self.old_context
-            else:
-                self.field._context = self.old_context
+        # restoring old context
+        if self.is_many:
+            self.field.child._context = self.old_context
+        else:
+            self.field._context = self.old_context
 
 
 def filter_fields(field_name: str, fields: set | None) -> set:

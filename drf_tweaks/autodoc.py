@@ -15,7 +15,6 @@ you can also override autodoc classess
 @autodoc(classess=[PaginationAutodoc])
 """
 
-import itertools
 from django.conf import settings
 from functools import wraps
 from rest_framework.settings import import_from_string
@@ -281,17 +280,15 @@ def autodoc(
 
     def wrapped(cls):
         applies_to = set()
-        classess_to_apply = (
+        classess_to_apply = [
             c for c in classess if not skip_classess or c not in skip_classess
-        )
+        ]
         if add_classess:
-            add_classess_to_apply = (
+            classess_to_apply.extend(
                 c for c in add_classess if not skip_classess or c not in skip_classess
             )
 
-        for autodoc_class in itertools.chain(
-            classess_to_apply, add_classess_to_apply or []
-        ):
+        for autodoc_class in classess_to_apply:
             applies_to |= set(autodoc_class.applies_to)
 
         # Create facades for original methods - docstring of methods are immutable,

@@ -10,7 +10,7 @@ class BulkEditAPIMixin:
 
     def _get_item_id_key(self, item):
         """Items use id for update and delete and temp_id for create"""
-        for key in ["id", "temp_id"]:
+        for key in ("id", "temp_id"):
             if key in item:
                 return key
 
@@ -56,22 +56,25 @@ class BulkEditAPIMixin:
 
         errors = []
         actions = deque()
-        for change_type in items:
-            for item_id, item in items[change_type].items():
-                if change_type == "create":
-                    instance = None
-                    serializer = self.get_serializer(data=item)
-                    action = serializer.save
-                elif change_type in ["update", "delete"]:
-                    instance = update_delete_objects[item_id]
-                    serializer = self.get_details_serializer(
+        for change_type, item_dict in items.items():
+            for item_id, item in item_dict.items():
+                instance = (
+                    None if change_type == "create" else update_delete_objects[item_id]
+                )
+                serializer = (
+                    self.get_serializer(data=item)
+                    if change_type == "create"
+                    else self.get_details_serializer(
                         instance=instance, data=item, partial=True
                     )
-                    action = {"update": serializer.save, "delete": instance.delete}[
-                        change_type
-                    ]
-
+                )
+                action = (
+                    serializer.save
+                    if change_type in {"create", "update"}
+                    else instance.delete
+                )
                 id_key = self._get_item_id_key(item)
+
                 if serializer and not serializer.is_valid():
                     item_error = {id_key: item_id}
                     item_error.update(serializer.errors)
