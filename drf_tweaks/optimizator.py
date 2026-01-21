@@ -12,6 +12,7 @@ from rest_framework.serializers import (
     SerializerMethodField,
 )
 
+from .serializers import filter_fields
 from .fields import AsymetricRelatedField
 
 _logger = logging.getLogger(__name__)
