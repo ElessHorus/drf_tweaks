@@ -76,9 +76,9 @@ def autofilter(extra_ordering=None, extra_filter=None, exclude_fields=None):
                 class Meta(cls.filter_class.Meta):
                     fields = new_filters
 
-            cls.filter_class = new_filter_class
+            cls.filterset_class = new_filter_class
         else:
-            cls.filter_fields = new_filters
+            cls.filterset_fields = new_filters
 
         return cls
 
