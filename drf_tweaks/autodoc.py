@@ -15,6 +15,7 @@ you can also override autodoc classess
 @autodoc(classess=[PaginationAutodoc])
 """
 
+import itertools
 from django.conf import settings
 from functools import wraps
 from rest_framework.settings import import_from_string
@@ -86,12 +87,9 @@ class PaginationAutodoc(AutodocBase):
                     documented_cls.pagination_class, item_name, None
                 ):
                     params.extend(
-                        [
-                            "{} -- optional, {}".format(
-                                getattr(documented_cls.pagination_class, item_name),
-                                item_name.replace("_query_param", ""),
-                            )
-                        ]
+                        (
+                            f"{getattr(documented_cls.pagination_class, item_name)} -- optional, {item_name.replace('_query_param', '')}",
+                        )
                     )
         return "\n".join(params)
 
@@ -185,12 +183,7 @@ class OrderingAndFilteringAutodoc(AutodocBase):
             text += "<b>Filtering:</b>"
             if isinstance(filter_fields, dict):
                 for key in sorted(filter_fields.keys()):
-                    text += "\n\n\t{}: {}".format(
-                        key,
-                        ", ".join(
-                            x if x == "exact" else "__" + x for x in filter_fields[key]
-                        ),
-                    )
+                    text += f"\n\n\t{key}: {', '.join(x if x == 'exact' else '__' + x for x in filter_fields[key])}"
             else:
                 for field in sorted(filter_fields):
                     text += f"\n\n\t{field}: exact"
@@ -288,15 +281,17 @@ def autodoc(
 
     def wrapped(cls):
         applies_to = set()
-        classess_to_apply = [
+        classess_to_apply = (
             c for c in classess if not skip_classess or c not in skip_classess
-        ]
+        )
         if add_classess:
-            classess_to_apply += [
+            add_classess_to_apply = (
                 c for c in add_classess if not skip_classess or c not in skip_classess
-            ]
+            )
 
-        for autodoc_class in classess_to_apply:
+        for autodoc_class in itertools.chain(
+            classess_to_apply, add_classess_to_apply or []
+        ):
             applies_to |= set(autodoc_class.applies_to)
 
         # Create facades for original methods - docstring of methods are immutable,
@@ -308,15 +303,18 @@ def autodoc(
                 copy_method(cls, method_name, method)
 
         # update docstrings
-        for autodoc_class in classess_to_apply:
-            for method_name in autodoc_class.applies_to:
-                if method := getattr(cls, method_name, None):
-                    method.__doc__ = autodoc_class.update_docstring(
-                        cls,
-                        base_doc,
-                        method.__doc__,
-                        method_name,
-                    )
+        for autodoc_class, method_name in (
+            (autodoc_class, method_name)
+            for autodoc_class in classess_to_apply
+            for method_name in autodoc_class.applies_to
+        ):
+            if method := getattr(cls, method_name, None):
+                method.__doc__ = autodoc_class.update_docstring(
+                    cls,
+                    base_doc,
+                    method.__doc__,
+                    method_name,
+                )
         return cls
 
     return wrapped
