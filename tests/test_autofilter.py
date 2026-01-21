@@ -84,7 +84,7 @@ class SampleApiV3(ListAPIView):
     serializer_class = SampleModelForAutofilterSerializerVer1
     queryset = SampleModelForAutofilter.objects.all()
     ordering_fields = ("non_indexed_char",)
-    filter_fields = ("non_indexed_email",)
+    filterset_fields = ("non_indexed_email",)
 
 
 @autofilter(extra_filter=("non_indexed_int",))
@@ -92,7 +92,7 @@ class SampleApiV4(ListAPIView):
     permission_classes = (AllowAny,)
     serializer_class = SampleModelForAutofilterSerializerVer1
     queryset = SampleModelForAutofilter.objects.all()
-    filter_class = SampleFilterClass
+    filterset_class = SampleFilterClass
 
 
 @autofilter()
@@ -100,7 +100,7 @@ class SampleApiV5(ListAPIView):
     permission_classes = (AllowAny,)
     serializer_class = SampleModelForAutofilterSerializerVer1
     queryset = SampleModelForAutofilter.objects.all()
-    filter_class = SampleFilterClass
+    filterset_class = SampleFilterClass
 
 
 @autofilter()
@@ -108,7 +108,7 @@ class SampleApiV6(ListAPIView):
     permission_classes = (AllowAny,)
     serializer_class = SampleModelForAutofilterSerializerVer1
     queryset = SampleModelForAutofilter.objects.all()
-    filter_class = SampleFilterClassV2
+    filterset_class = SampleFilterClassV2
 
 
 urlpatterns = [
@@ -204,9 +204,9 @@ class TestAutoFilter(TestCase):
             },
         )
 
-    def test_adding_filter_fields(self):
+    def test_adding_filterset_fields(self):
         self.assertEqual(
-            set(SampleApiV1.filter_fields.keys()),
+            set(SampleApiV1.filterset_fields.keys()),
             {
                 "id",
                 "fk",
@@ -220,13 +220,13 @@ class TestAutoFilter(TestCase):
             },
         )
         self.assertEqual(
-            set(SampleApiV2.filter_fields.keys()),
+            set(SampleApiV2.filterset_fields.keys()),
             {"id", "fk", "indexed_int", "indexed_char"},
         )
 
         for key in ("id", "fk", "indexed_int"):
             self.assertEqual(
-                SampleApiV1.filter_fields[key],
+                SampleApiV1.filterset_fields[key],
                 ["exact", "gt", "gte", "lt", "lte", "in", "isnull"],
             )
         for key in (
@@ -237,7 +237,7 @@ class TestAutoFilter(TestCase):
             "unique_text",
         ):
             self.assertEqual(
-                SampleApiV1.filter_fields[key],
+                SampleApiV1.filterset_fields[key],
                 [
                     "exact",
                     "gt",
@@ -251,9 +251,9 @@ class TestAutoFilter(TestCase):
                 ],
             )
 
-    def test_adding_filter_fields_with_extra_and_explicit(self):
+    def test_adding_filterset_fields_with_extra_and_explicit(self):
         self.assertEqual(
-            set(SampleApiV3.filter_fields.keys()),
+            set(SampleApiV3.filterset_fields.keys()),
             {
                 "id",
                 "fk",
@@ -269,14 +269,14 @@ class TestAutoFilter(TestCase):
             },
         )
 
-    def test_adding_filter_fields_with_extra_andfilter_class(self):
-        self.assertNotEqual(SampleApiV4.filter_class, SampleApiV5.filter_class)
+    def test_adding_filterset_fields_with_extra_andfilter_class(self):
+        self.assertNotEqual(SampleApiV4.filterset_class, SampleApiV5.filterset_class)
         self.assertNotEqual(
-            SampleApiV4.filter_class.Meta, SampleApiV5.filter_class.Meta
+            SampleApiV4.filterset_class.Meta, SampleApiV5.filterset_class.Meta
         )
 
         self.assertEqual(
-            set(SampleApiV4.filter_class.Meta.fields.keys()),
+            set(SampleApiV4.filterset_class.Meta.fields),
             {
                 "id",
                 "fk",
@@ -293,7 +293,7 @@ class TestAutoFilter(TestCase):
         )
 
         self.assertEqual(
-            set(SampleApiV5.filter_class.Meta.fields.keys()),
+            set(SampleApiV5.filterset_class.Meta.fields),
             {
                 "id",
                 "fk",
@@ -309,7 +309,7 @@ class TestAutoFilter(TestCase):
         )
 
         self.assertEqual(
-            set(SampleApiV6.filter_class.Meta.fields.keys()),
+            set(SampleApiV6.filterset_class.Meta.fields),
             {
                 "id",
                 "fk",
@@ -337,7 +337,7 @@ class TestAutoFilter(TestCase):
             queryset = SampleModelForAutofilter.objects.all()
 
         self.assertEqual(
-            set(SampleApiV7.filter_fields.keys()),
+            set(SampleApiV7.filterset_fields.keys()),
             {
                 "id",
                 "fk",

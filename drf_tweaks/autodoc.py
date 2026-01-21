@@ -174,8 +174,8 @@ class OrderingAndFilteringAutodoc(AutodocBase):
             text += "<b>Sorting:</b>\n\n\tusage: ?ordering=FIELD_NAME,-OTHER_FIELD_NAME\n\n\tavailable fields: "
             text += ", ".join(sorted(ordering_fields))
 
-        filter_fields = getattr(documented_cls, "filter_fields", None)
-        filter_class = getattr(documented_cls, "filter_class", None)
+        filter_fields = getattr(documented_cls, "filterset_fields", None)
+        filter_class = getattr(documented_cls, "filterset_class", None)
         if filter_class:
             filter_fields = filter_class.Meta.fields
 
